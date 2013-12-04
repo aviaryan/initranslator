@@ -1,0 +1,4 @@
+initranslator
+=============
+
+Translates Ini's
