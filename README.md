@@ -2,6 +2,9 @@ InI Translator
 =============
 **beta stage**  
   
+Site - [http://avi.uco.im/projects/initranslator](http://avi.uco.im/projects/initranslator)  
+  
+  
 Created in **AutoHotkey**, this program translates ini-formatted files in batch on the go.   
 Supports all the major languages.  
   
