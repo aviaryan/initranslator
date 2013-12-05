@@ -58,12 +58,3 @@ static codes := { Afrikaans: "af", Albanian: "sq", Amharic: "am", Arabic: "ar", 
 	}
 	else return codes[Lang]
 }
-
-
-;-------------------------------------- Batch replacer ----------------------------
-PowerReplace(input, find, replace, options="All"){
-	StringSplit, rep, replace, % A_space
-	loop, parse, find, % A_Space
-		StringReplace, input, input, % A_LoopField, % rep%A_index%, % options
-	return Input
-}

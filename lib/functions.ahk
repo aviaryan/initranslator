@@ -53,3 +53,12 @@ Ini_write(section, key, value="", ifblank=true){
 	if !ifblank
 		IniWrite,% value,% CONFIGURATION_FILE,% section,% key
 }
+
+
+;-------------------------------------- Batch replacer ----------------------------
+PowerReplace(input, find, replace, options="All"){
+	StringSplit, rep, replace, % A_space
+	loop, parse, find, % A_Space
+		StringReplace, input, input, % A_LoopField, % rep%A_index%, % options
+	return Input
+}

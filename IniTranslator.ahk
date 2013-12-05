@@ -18,7 +18,7 @@
 
 ;@Ahk2Exe-SetName IniTranslator
 ;@Ahk2Exe-SetDescription IniTranslator
-;@Ahk2Exe-SetVersion 0.0.0.1
+;@Ahk2Exe-SetVersion 0.0.0.2
 ;@Ahk2Exe-SetCopyright Avi Aryan
 ;@Ahk2Exe-SetOrigFilename IniTranslator.exe
 
@@ -29,7 +29,7 @@ ListLines, Off
 
 global PROGNAME := "Ini Translator"
 global CONFIGURATION_FILE := "iniTranslator.ini"
-global version := "0.0.0.1"
+global version := "0.0.0.2"
 global ini_RootDir, translateAPI, ini_removeampersand, ini_wf, ini_hf
 
 init()
@@ -47,7 +47,7 @@ iniT_gui(){
 	height := Floor( A_Screenheight / 3.8 ) * ini_hf
 
 	Gui, Add, GroupBox, % "w" width " h60 section", % "Choose Ini File"
-	Gui, Add, Edit, % "xp+10 yp+20 w" width-150 " vselfile"
+	Gui, Add, Edit, % "xp+10 yp+20 w" width-150 " vselfile gedit_open"
 	Gui, Add, Button, % "x" width-80 " yp w70 gIniTbuttonOpen Default", % "Br&owse"
 
 	;20 margin between group boxes
@@ -56,8 +56,8 @@ iniT_gui(){
 	Gui, Add, ListBox, % "xp y+10 w" width/3 - 25 " h" height-70 " vsellangs +Multi", % getLangcode()
 
 	Gui, Add, GroupBox, % "x" width/3+25 " h" height " ys w" width*0.66-10 " section", % "Keywords to preserve"
-	Gui, Add, Text, % "xp+10 yp+20", % "List here all the keywords or phrases that you dont want to be translated.`nfor eg -> Settings Window"
-	Gui, Add, Edit, % "xp y+10 w" width*0.66-30 " h" height-70 " +multi vignorew",
+	Gui, Add, Text, % "xp+10 yp+20", % "List here all the keywords or phrases that you dont want to be translated.`nfor eg -> Window  (and)  Incognito Mode"
+	Gui, Add, Edit, % "xp y+10 w" width*0.66-30 " h" height-70 " +multi vignorew", % "window"
 
 	Gui, Add, GroupBox, % "ys+" height+20 " x7 h90 section w" width, % "Save As"
 	Gui, Add, Text, % "xp+10 yp+20", % "For multiple selections, you can use a variable such as *lang* to substitute translated language at that place.`n"
@@ -92,6 +92,12 @@ IniTbuttonOpen:
 	}
 	return
 
+edit_open:
+	Gui, submit, nohide
+	ini_RootDir := Substr(selfile, 1, Instr(selfile, "\", 0, 0)-1)
+	GuiControl,, savefile, % ini_Rootdir "\*lang*." Substr(selfile, Instr(selfile, ".", 0, 0)+1)
+	return
+
 IniTbuttonSave:
 	FileSelectFile, savefile, S16, %ini_Rootdir%, % "Save translated file as"
 	if savefile
@@ -124,15 +130,13 @@ IniTbuttontranslate:
 			keylines[A_index] := 1 , text2translate .= Substr( A_LoopReadLine, Instr(A_loopreadline, "=")+1 ) "`n"
 	}
 	;replace ignorew
-	loop, parse, ignorew, `n
-		StringReplace, text2translate, text2translate, % A_LoopReadLine, % A_LoopReadLine "0dttft2", All 			; dont translate this f text
-
 	if ini_removeampersand
-		text2translate := RegExReplace(text2translate, "i)&[a-z0-9]", "")
+		text2translate := RegExReplace(text2translate, "i)&([a-z0-9])", "$1")
+	text2translate := protect_Words(text2translate, 0, ignorew)
 
 	nooflangs := getQuant(sellangs, "|") + 1
 	if !savefile
-		savefile := ini_Rootdir "\*lang*.ini"
+		savefile := ini_Rootdir "\*lang*." Substr(selfile, Instr(selfile, ".", 0, 0)+1)
 
 	;translate
 	loop, parse, sellangs, |
@@ -142,8 +146,7 @@ IniTbuttontranslate:
 		SB_SetText("Translating " A_index " (" A_LoopField  ") of " nooflangs)
 
 		translatedtext := TranslateAPI.translate( text2translate , A_LoopField )
-
-		StringReplace, translatedtext, translatedtext, 0dttft2,, All 	; fix ignore words
+		translatedtext := protect_Words(translatedtext, 1) 			; un protect
 
 		loop, parse, translatedtext, `n
 			translatedobj.Insert(A_LoopField)
@@ -192,9 +195,31 @@ help:
 
 Exit:
 	IniWrite, % ini_RootDir, % CONFIGURATION_FILE, Main, rootdir
+	translateAPI.o := ""
 	Exitapp
 	return
 
+protect_Words(str, un=0, words="", key_prestr="0dttft2", key_spc="0ptfs2"){
+; key has 2 components
+	if !un
+	{
+		loop, parse, words, `n
+		{
+			if Instr(A_LoopField, " ")
+				StringReplace, x, A_LoopField, % A_space, % key_spc, All
+			else x := A_LoopField
+			str := RegExReplace(str, "im)([^a-z0-9_]|^)" A_LoopField "([^a-z0-9_]|$)", "$1" key_prestr x "$2")
+			str := RegExReplace(str, "im)([^a-z0-9_]|^)" A_LoopField "([^a-z0-9_]|$)", "$1" key_prestr x "$2") 		; doing it 2 times is necessary
+		}
+		return str
+	}
+	else
+	{
+		StringReplace, str, str, % key_prestr, % blank, All
+		StringReplace, str, str, % key_spc, % A_space, All
+		return str
+	}
+}
 
 
 init(){
