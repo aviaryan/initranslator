@@ -2,7 +2,7 @@ InI Translator
 =============
 **beta stage**  
   
-Site - [http://avi.uco.im/projects/initranslator](http://avi.uco.im/projects/initranslator)  
+Site - [http://aviaryan.in/projects/initranslator](http://aviaryan.in/projects/initranslator)  
   
   
 Created in **AutoHotkey**, this program translates ini-formatted files in batch on the go.   
@@ -10,7 +10,7 @@ Supports all the major languages.
   
   
 #### Running from the Source
-1. Get [AutoHotkey](http://www.autohotkey.com) and install it.
+1. Get [AutoHotkey](http://www.ahkscript.org) and install it.
 2. Then double-click `IniTranslator.ahk` to run it with AutoHotkey.exe
   
 #### Compiling the Source
